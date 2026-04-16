@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>牙周炎风险评估系统 | 大学生口腔健康守护</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #0284c7 0%, #0ea5e9 50%, #06b6d4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(14, 165, 233, 0.15);
+        }
+        
+        .progress-ring {
+            transform: rotate(-90deg);
+        }
+        
+        .tip-popup {
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .pulse-ring {
+            animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+        }
+        
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(14, 165, 233, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 20px rgba(14, 165, 233, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(14, 165, 233, 0); }
+        }
+        
+        .floating {
+            animation: floating 3s ease-in-out infinite;
+        }
+        
+        @keyframes floating {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .option-card {
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .option-card:hover {
+            border-color: #0ea5e9;
+            background-color: #f0f9ff;
+        }
+        .option-card.selected {
+            border-color: #0284c7;
+            background-color: #e0f2fe;
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2);
+        }
+        
+        .smooth-scroll {
+            scroll-behavior: smooth;
+        }
+        
+        .risk-low { color: #10b981; }
+        .risk-medium { color: #f59e0b; }
+        .risk-high { color: #ef4444; }
+        
+        .bg-risk-low { background-color: #10b981; }
+        .bg-risk-medium { background-color: #f59e0b; }
+        .bg-risk-high { background-color: #ef4444; }
+
+        /* 科普内容样式 */
+        .science-content {
+            line-height: 1.8;
+        }
+        .science-content h4 {
+            color: #0284c7;
+            font-weight: 600;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        .science-content p {
+            margin-bottom: 0.75rem;
+            color: #475569;
+        }
+        .symptom-tag {
+            display: inline-block;
+            background: #e0f2fe;
+            color: #0284c7;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            margin: 0.25rem;
+        }
+    </style>
+</head>
+<body class="smooth-scroll text-slate-700">
+
+    <!-- 顶部提示弹窗 -->
+    <div id="dailyTip" class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 hidden">
+        <div class="glass-effect rounded-2xl px-6 py-4 shadow-2xl flex items-center gap-3 max-w-md mx-4 tip-popup border-l-4 border-sky-500">
+            <i class="fas fa-lightbulb text-yellow-500 text-xl"></i>
+            <div>
+                <p class="font-bold text-slate-800 text-sm">💡 今日护牙小贴士</p>
+                <p id="tipContent" class="text-slate-600 text-sm mt-1"></p>
+            </div>
+            <button onclick="closeTip()" class="ml-2 text-slate-400 hover:text-slate-600">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- 导航栏 -->
+    <nav class="fixed w-full z-40 glass-effect border-b border-white/50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center gap-2">
+                    <div class="w-10 h-10 bg-gradient-to-br from-sky-400 to-cyan-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg">
+                        <i class="fas fa-tooth"></i>
+                    </div>
+                    <span class="font-bold text-xl gradient-text">牙周炎风险评估</span>
+                </div>
+                <div class="hidden md:flex space-x-8">
+                    <a href="#home" class="text-slate-600 hover:text-sky-600 font-medium transition">首页</a>
+                    <a href="#assessment" class="text-slate-600 hover:text-sky-600 font-medium transition">风险自测</a>
+                    <a href="#knowledge" class="text-slate-600 hover:text-sky-600 font-medium transition">知识科普</a>
+                    <a href="#plan" class="text-slate-600 hover:text-sky-600 font-medium transition">7天计划</a>
+                    <a href="#about" class="text-slate-600 hover:text-sky-600 font-medium transition">关于模型</a>
+                </div>
+                <button class="md:hidden text-slate-600 text-2xl" onclick="toggleMobileMenu()">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+        <!-- 移动端菜单 -->
+        <div id="mobileMenu" class="hidden md:hidden glass-effect border-t">
+            <div class="px-4 pt-2 pb-4 space-y-2">
+                <a href="#home" class="block px-3 py-2 rounded-lg hover:bg-sky-50 text-slate-600">首页</a>
+                <a href="#assessment" class="block px-3 py-2 rounded-lg hover:bg-sky-50 text-slate-600">风险自测</a>
+                <a href="#knowledge" class="block px-3 py-2 rounded-lg hover:bg-sky-50 text-slate-600">知识科普</a>
+                <a href="#plan" class="block px-3 py-2 rounded-lg hover:bg-sky-50 text-slate-600">7天计划</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 首页 Hero Section -->
+    <section id="home" class="pt-32 pb-20 px-4">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div class="space-y-6">
+                    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-sky-100 text-sky-700 text-sm font-medium">
+                        <span class="w-2 h-2 rounded-full bg-sky-500 animate-pulse"></span>
+                        基于机器学习的智能预测
+                    </div>
+                    <h1 class="text-4xl md:text-6xl font-bold leading-tight">
+                        守护大学生<br>
+                        <span class="gradient-text">口腔健康</span>
+                    </h1>
+                    <p class="text-lg text-slate-600 leading-relaxed">
+                        专为大学生设计的牙周炎风险评估工具。通过科学的问卷分析和机器学习算法，3分钟了解你的牙周健康状况，获取个性化改善方案。
+                    </p>
+                    <div class="flex flex-wrap gap-4">
+                        <a href="#assessment" class="px-8 py-4 bg-gradient-to-r from-sky-500 to-cyan-600 text-white rounded-2xl font-semibold shadow-lg hover:shadow-xl hover:scale-105 transition flex items-center gap-2">
+                            <i class="fas fa-clipboard-check"></i>
+                            开始风险评估
+                        </a>
+                        <a href="#knowledge" class="px-8 py-4 glass-effect text-slate-700 rounded-2xl font-semibold hover:bg-white/90 transition flex items-center gap-2">
+                            <i class="fas fa-book-medical"></i>
+                            了解牙周炎
+                        </a>
+                    </div>
+                    <div class="flex items-center gap-6 pt-4 text-sm text-slate-500">
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-check-circle text-green-500"></i>
+                            <span>科学算法</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-check-circle text-green-500"></i>
+                            <span>隐私保护</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-check-circle text-green-500"></i>
+                            <span>免费使用</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="relative">
+                    <div class="absolute inset-0 bg-gradient-to-r from-sky-400 to-cyan-400 rounded-3xl blur-3xl opacity-20"></div>
+                    <div class="relative glass-effect rounded-3xl p-8 shadow-2xl floating">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-white/60 rounded-2xl p-4 text-center">
+                                <div class="text-3xl font-bold text-sky-600">85%</div>
+                                <div class="text-sm text-slate-600 mt-1">大学生患病率</div>
+                            </div>
+                            <div class="bg-white/60 rounded-2xl p-4 text-center">
+                                <div class="text-3xl font-bold text-cyan-600">3min</div>
+                                <div class="text-sm text-slate-600 mt-1">快速评估</div>
+                            </div>
+                            <div class="bg-white/60 rounded-2xl p-4 text-center">
+                                <div class="text-3xl font-bold text-teal-600">AI</div>
+                                <div class="text-sm text-slate-600 mt-1">智能分析</div>
+                            </div>
+                            <div class="bg-white/60 rounded-2xl p-4 text-center">
+                                <div class="text-3xl font-bold text-emerald-600">免费</div>
+                                <div class="text-sm text-slate-600 mt-1">专业建议</div>
+                            </div>
+                        </div>
+                        <div class="mt-6 p-4 bg-gradient-to-r from-sky-50 to-cyan-50 rounded-xl border border-sky-100">
+                            <div class="flex items-center gap-3">
+                                <div class="w-12 h-12 rounded-full bg-sky-100 flex items-center justify-center text-sky-600">
+                                    <i class="fas fa-quote-left"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-slate-600 italic">"早期预防比治疗更重要，关注牙周健康从日常做起。"</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 风险自测问卷 - 八项特征 -->
+    <section id="assessment" class="py-20 bg-white/50">
+        <div class="max-w-4xl mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">牙周炎风险自测</h2>
+                <p class="text-slate-600">基于八项校园生活特征的科学评估，为你生成个性化风险报告</p>
+            </div>
+
+            <div class="glass-effect rounded-3xl p-8 shadow-xl">
+                <!-- 进度条 -->
+                <div class="mb-8">
+                    <div class="flex justify-between text-sm text-slate-600 mb-2">
+                        <span>进度</span>
+                        <span id="progressText">1/8</span>
+                    </div>
+                    <div class="h-2 bg-slate-200 rounded-full overflow-hidden">
+                        <div id="progressBar" class="h-full bg-gradient-to-r from-sky-500 to-cyan-500 transition-all duration-500" style="width: 12.5%"></div>
+                    </div>
+                </div>
+
+                <!-- 问卷内容 -->
+                <div id="questionContainer" class="space-y-6">
+                    <!-- 问题将通过JS动态插入 -->
+                </div>
+
+                <!-- 导航按钮 -->
+                <div class="flex justify-between mt-8 pt-6 border-t border-slate-200">
+                    <button id="prevBtn" onclick="prevQuestion()" class="px-6 py-3 rounded-xl border border-slate-300 text-slate-600 hover:bg-slate-50 transition hidden">
+                        <i class="fas fa-arrow-left mr-2"></i>上一题
+                    </button>
+                    <button id="nextBtn" onclick="nextQuestion()" class="px-6 py-3 rounded-xl bg-gradient-to-r from-sky-500 to-cyan-600 text-white hover:shadow-lg transition ml-auto">
+                        下一题<i class="fas fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 预测结果展示（初始隐藏） -->
+    <section id="result" class="py-20 hidden">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">你的风险评估报告</h2>
+                <p class="text-slate-600">基于机器学习模型的智能分析结果</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-6 mb-12">
+                <!-- 风险等级卡片 -->
+                <div class="glass-effect rounded-3xl p-8 text-center shadow-xl card-hover">
+                    <div class="relative w-32 h-32 mx-auto mb-4">
+                        <svg class="progress-ring w-32 h-32" viewBox="0 0 120 120">
+                            <circle cx="60" cy="60" r="54" fill="none" stroke="#e2e8f0" stroke-width="8"/>
+                            <circle id="riskCircle" cx="60" cy="60" r="54" fill="none" stroke="#0ea5e9" stroke-width="8" stroke-linecap="round" stroke-dasharray="339.292" stroke-dashoffset="100"/>
+                        </svg>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <span id="riskScore" class="text-3xl font-bold text-slate-800">--</span>
+                        </div>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">风险等级</h3>
+                    <p id="riskLevel" class="text-2xl font-bold mb-2">--</p>
+                    <p id="riskDesc" class="text-sm text-slate-600">--</p>
+                </div>
+
+                <!-- 主要风险因素 -->
+                <div class="glass-effect rounded-3xl p-8 shadow-xl card-hover md:col-span-2">
+                    <h3 class="text-xl font-bold mb-6 flex items-center gap-2">
+                        <i class="fas fa-exclamation-triangle text-amber-500"></i>
+                        主要风险因素分析
+                    </h3>
+                    <div id="riskFactors" class="space-y-4">
+                        <!-- 动态生成 -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- 个性化改善方案 -->
+            <div class="glass-effect rounded-3xl p-8 shadow-xl mb-12">
+                <h3 class="text-2xl font-bold mb-6 flex items-center gap-2">
+                    <i class="fas fa-clipboard-list text-sky-500"></i>
+                    个性化改善方案
+                </h3>
+                <div id="improvementPlan" class="grid md:grid-cols-2 gap-6">
+                    <!-- 动态生成 -->
+                </div>
+            </div>
+
+            <!-- 重新测试按钮 -->
+            <div class="text-center">
+                <button onclick="resetAssessment()" class="px-8 py-4 glass-effect rounded-2xl font-semibold hover:bg-white/90 transition">
+                    <i class="fas fa-redo mr-2"></i>重新评估
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- 知识科普 - 整合文档内容 -->
+    <section id="knowledge" class="py-20 bg-gradient-to-b from-white/50 to-sky-50/50">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">牙周炎知识科普</h2>
+                <p class="text-slate-600">全面认识牙周疾病，科学守护口腔健康</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-6 mb-8">
+                <!-- 基础认知 -->
+                <div class="glass-effect rounded-3xl p-6 shadow-lg card-hover cursor-pointer" onclick="toggleCard(this)">
+                    <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-400 to-cyan-600 flex items-center justify-center text-white text-2xl mb-4">
+                        <i class="fas fa-book-medical"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">一、基础认知</h3>
+                    <div class="science-content hidden card-content">
+                        <h4>什么是牙周炎？</h4>
+                        <p>牙周炎是由牙菌斑细菌引发的慢性炎症，破坏牙龈、牙周膜和牙槽骨，是成年人失牙的首要原因。它通常始于可逆的牙龈炎（红肿、出血），若未干预，则发展为不可逆的牙周炎，出现牙周袋和牙槽骨吸收。</p>
+                        
+                        <h4>牙龈炎 vs 牙周炎</h4>
+                        <p>牙龈出血通常是牙龈炎的典型表现，此时炎症仅限于牙龈软组织，通过清洁可完全逆转。若长期忽视，炎症会向深层发展，破坏牙槽骨，这才演变为不可逆的牙周炎。能止住的出血多是牙龈炎，伴随牙齿松动或牙龈萎缩的出血，往往已是牙周炎。</p>
+                        
+                        <h4>牙菌斑与牙结石</h4>
+                        <p>牙菌斑是口腔细菌在牙齿表面不断沉积形成的无色黏性生物膜，通常在刷牙后数小时内即可重新生成。若牙菌斑未被及时清除，其中的矿物质（主要是唾液中的钙、磷）会逐渐沉积、矿化，在24至72小时内开始形成坚硬的牙结石。牙结石一旦形成，无法通过刷牙去除，只能通过专业洁治（洗牙）清除。</p>
+                    </div>
+                    <div class="mt-4 text-sky-600 text-sm font-medium flex items-center gap-1">
+                        <span class="toggle-text">展开详情</span>
+                        <i class="fas fa-chevron-down transition-transform"></i>
+                    </div>
+                </div>
+
+                <!-- 口腔卫生行为 -->
+                <div class="glass-effect rounded-3xl p-6 shadow-lg card-hover cursor-pointer" onclick="toggleCard(this)">
+                    <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center text-white text-2xl mb-4">
+                        <i class="fas fa-tooth"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">二、口腔卫生行为</h3>
+                    <div class="science-content hidden card-content">
+                        <h4>巴氏刷牙法</h4>
+                        <p>将牙刷刷毛与牙龈呈45度角，对准牙齿与牙龈的交界处，以小幅水平震颤的方式轻轻刷动，每次覆盖2-3颗牙。这种震颤动作主要用于清除牙龈沟内的牙菌斑，而非大幅拉锯式横刷，以避免损伤牙龈和牙齿颈部。</p>
+                        
+                        <h4>牙线使用</h4>
+                        <p>持牙线棒柄部，将牙线对准牙缝，以轻柔的拉锯式动作滑入牙龈沟底，然后将牙线紧贴一侧牙面，从沟底向咬合面方向提拉刮除菌斑。每清洁一个牙缝后，用纸巾擦净或冲洗牙线棒，避免将菌斑带入下一个牙缝。</p>
+                        
+                        <h4>冲牙器使用</h4>
+                        <p>冲牙器利用高压脉冲水流冲走牙缝和牙龈沟内的食物残渣及松散菌斑，适合作为刷牙和牙线的辅助工具。使用时将喷头垂直于牙面，沿牙龈边缘缓慢移动，每颗牙停留1-2秒。注意冲牙器无法有效清除紧贴牙面的成熟菌斑，不能替代传统牙线。</p>
+                    </div>
+                    <div class="mt-4 text-sky-600 text-sm font-medium flex items-center gap-1">
+                        <span class="toggle-text">展开详情</span>
+                        <i class="fas fa-chevron-down transition-transform"></i>
+                    </div>
+                </div>
+
+                <!-- 风险因素与症状 -->
+                <div class="glass-effect rounded-3xl p-6 shadow-lg card-hover cursor-pointer" onclick="toggleCard(this)">
+                    <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-rose-400 to-pink-600 flex items-center justify-center text-white text-2xl mb-4">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">三、风险因素与症状</h3>
+                    <div class="science-content hidden card-content">
+                        <h4>早期症状（容易被忽视）</h4>
+                        <p>牙周炎早期症状通常不明显且无痛，主要表现为刷牙或咬硬物时牙龈出血、口腔异味，以及牙龈边缘红肿。用手指沿牙龈边缘轻轻推压，可能挤出少量渗液。若出现牙龈与牙齿分离形成"假性牙周袋"，或单颗牙咀嚼无力，提示已从牙龈炎进展为早期牙周炎。</p>
+                        
+                        <div class="flex flex-wrap mt-2">
+                            <span class="symptom-tag">牙龈肿胀</span>
+                            <span class="symptom-tag">牙龈出血</span>
+                            <span class="symptom-tag">牙龈疼痛</span>
+                            <span class="symptom-tag">牙齿松动</span>
+                            <span class="symptom-tag">咀嚼无力</span>
+                            <span class="symptom-tag">口臭</span>
+                            <span class="symptom-tag">牙龈退缩</span>
+                            <span class="symptom-tag">口干症</span>
+                        </div>
+
+                        <h4>牙龈萎缩与牙齿松动原因</h4>
+                        <p>最常见原因是牙周炎——牙菌斑堆积导致牙槽骨持续吸收，失去骨骼包裹的牙龈随之退缩，牙齿也因支持组织减少而松动。其他原因包括刷牙用力过猛造成的机械性牙龈损伤、牙齿咬合创伤，以及随年龄增长发生的生理性骨量减少。</p>
+                        
+                        <h4>口臭与牙周炎</h4>
+                        <p>牙周炎是导致口臭的常见器质性原因之一。牙周袋内的厌氧菌分解含硫氨基酸，产生挥发性硫化物（如硫化氢、甲硫醇），直接发出腐败性气味。这种口臭无法通过刷牙、漱口水或嚼口香糖根除，只有通过牙周治疗清除菌斑和牙石后才能有效控制。</p>
+                    </div>
+                    <div class="mt-4 text-sky-600 text-sm font-medium flex items-center gap-1">
+                        <span class="toggle-text">展开详情</span>
+                        <i class="fas fa-chevron-down transition-transform"></i>
+                    </div>
+                </div>
+
+                <!-- 治疗与预防 -->
+                <div class="glass-effect rounded-3xl p-6 shadow-lg card-hover cursor-pointer" onclick="toggleCard(this)">
+                    <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-600 flex items-center justify-center text-white text-2xl mb-4">
+                        <i class="fas fa-user-md"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">四、治疗与预防</h3>
+                    <div class="science-content hidden card-content">
+                        <h4>洗牙（洁治）</h4>
+                        <p>洗牙主要分为两个步骤：先用超声波洁治器震碎并去除牙石和菌斑，再用手用器械进行精细刮治，最后进行抛光以减少菌斑再次附着。整个过程通常伴有轻微酸胀感，但不会损伤牙齿或导致牙缝变大——牙缝显露恰恰是因为原有的牙石被清除后，已经存在的牙龈萎缩暴露出来。定期洗牙（每年1-2次）是预防和治疗牙周炎的基础措施。</p>
+                        
+                        <h4>龈下刮治</h4>
+                        <p>使用精细的手用器械或超声波器械，伸入牙龈下方的牙周袋内，将附着在牙根面上的牙石和菌斑彻底清除的操作。该治疗通常在局部麻醉下进行，以消除炎症根源，促进牙龈与牙根面重新贴合。与常规洗牙相比，龈下刮治针对的是牙龈下方不可见的病变，是治疗牙周炎的核心手段。</p>
+                        
+                        <h4>牙周炎手术</h4>
+                        <p>主要包括翻瓣术和再生性手术，是在基础治疗无法控制深牙周袋时进行的介入方式。翻瓣术是将牙龈翻开，在直视下彻底清除根面菌斑和牙石，并修整病变组织；再生性手术则在清除病灶后植入骨粉或生物材料，引导被破坏的牙槽骨再生。</p>
+                    </div>
+                    <div class="mt-4 text-sky-600 text-sm font-medium flex items-center gap-1">
+                        <span class="toggle-text">展开详情</span>
+                        <i class="fas fa-chevron-down transition-transform"></i>
+                    </div>
+                </div>
+
+                <!-- 大学生为什么容易得 -->
+                <div class="glass-effect rounded-3xl p-6 shadow-lg card-hover cursor-pointer" onclick="toggleCard(this)">
+                    <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-400 to-indigo-600 flex items-center justify-center text-white text-2xl mb-4">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">五、大学生高发原因</h3>
+                    <div class="science-content hidden card-content">
+                        <h4>为什么大学生容易得牙周炎？</h4>
+                        <p><strong>作息不规律：</strong>熬夜刷剧、打游戏导致免疫力下降，口腔自洁能力减弱。</p>
+                        <p><strong>饮食习惯：</strong>高糖饮料、外卖频繁，口腔环境恶化，为细菌繁殖提供温床。</p>
+                        <p><strong>忽视口腔卫生：</strong>懒得刷牙、不用牙线，菌斑堆积形成牙结石。</p>
+                        <p><strong>压力大：</strong>考试周焦虑引发磨牙、免疫力降低，加重牙周炎症。</p>
+                        <p><strong>错颌畸形：</strong>牙齿排列不齐导致清洁困难，局部菌斑堆积风险增加。</p>
+                        
+                        <h4>心理健康与口腔健康</h4>
+                        <p>焦虑、抑郁、长期精神压力是灼口综合征、复发性阿弗他溃疡、磨牙症等疾病的重要诱因。不良心理状态可抑制免疫功能，使牙周炎更易发生且难以控制。同时，口腔病痛（牙痛、牙龈肿痛、口臭等）也会引发焦虑、烦躁、失眠及抑郁情绪，形成恶性循环。</p>
+                    </div>
+                    <div class="mt-4 text-sky-600 text-sm font-medium flex items-center gap-1">
+                        <span class="toggle-text">展开详情</span>
+                        <i class="fas fa-chevron-down transition-transform"></i>
+                    </div>
+                </div>
+
+                <!-- 能否逆转 -->
+                <div class="glass-effect rounded-3xl p-6 shadow-lg card-hover cursor-pointer" onclick="toggleCard(this)">
+                    <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-teal-400 to-cyan-600 flex items-center justify-center text-white text-2xl mb-4">
+                        <i class="fas fa-sync-alt"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">六、能否逆转？</h3>
+                    <div class="science-content hidden card-content">
+                        <div class="space-y-4 mt-4">
+                            <div class="p-4 bg-green-50 rounded-xl border border-green-200">
+                                <div class="font-bold text-green-800 mb-2 text-lg">🟢 早期牙龈炎 — 完全可以逆转</div>
+                                <p class="text-green-700 text-sm">炎症仅限于牙龈软组织，未伤及深层组织。通过洗牙、正确刷牙、使用牙线可完全恢复，牙龈出血可完全停止。</p>
+                            </div>
+                            <div class="p-4 bg-yellow-50 rounded-xl border border-yellow-200">
+                                <div class="font-bold text-yellow-800 mb-2 text-lg">🟡 轻度牙周炎 — 可控制，部分恢复</div>
+                                <p class="text-yellow-700 text-sm">已有轻度牙槽骨吸收，但通过龈下刮治和良好口腔卫生维护，可以阻止病情进展，部分组织可修复。</p>
+                            </div>
+                            <div class="p-4 bg-red-50 rounded-xl border border-red-200">
+                                <div class="font-bold text-red-800 mb-2 text-lg">🔴 中重度牙周炎 — 不可逆，需终身维护</div>
+                                <p class="text-red-700 text-sm">牙槽骨已明显吸收，牙周袋形成。只能通过治疗控制炎症，无法完全治愈，需要定期复查维护，防止牙齿脱落。</p>
+                            </div>
+                        </div>
+                        <p class="text-sm text-slate-500 mt-4 italic">关键提示：牙龈炎不松动，牙周炎牙齿会松动！早期发现是关键。</p>
+                    </div>
+                    <div class="mt-4 text-sky-600 text-sm font-medium flex items-center gap-1">
+                        <span class="toggle-text">展开详情</span>
+                        <i class="fas fa-chevron-down transition-transform"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 7天护牙计划 -->
+    <section id="plan" class="py-20">
+        <div class="max-w-5xl mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">7天护牙养成计划</h2>
+                <p class="text-slate-600">科学习惯，从这一周开始</p>
+            </div>
+
+            <div class="space-y-4">
+                <!-- Day 1 -->
+                <div class="glass-effect rounded-2xl p-6 shadow-md hover:shadow-lg transition cursor-pointer" onclick="toggleDay(this)">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-sky-400 to-cyan-500 text-white flex items-center justify-center font-bold text-lg">1</div>
+                            <div>
+                                <h3 class="font-bold text-lg">基础检查日</h3>
+                                <p class="text-slate-500 text-sm">了解自己的口腔现状</p>
+                            </div>
+                        </div>
+                        <i class="fas fa-chevron-down text-slate-400 transition-transform"></i>
+                    </div>
+                    <div class="hidden mt-4 pl-16 text-slate-600 text-sm space-y-2">
+                        <p>✓ 对着镜子检查牙龈颜色（健康：粉红色，发炎：深红/紫红）</p>
+                        <p>✓ 用手指轻推牙龈边缘，检查是否有渗液</p>
+                        <p>✓ 记录是否有刷牙出血情况</p>
+                        <p>✓ 购买软毛牙刷和含氟牙膏</p>
+                    </div>
+                </div>
+
+                <!-- Day 2 -->
+                <div class="glass-effect rounded-2xl p-6 shadow-md hover:shadow-lg transition cursor-pointer" onclick="toggleDay(this)">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-sky-400 to-cyan-500 text-white flex items-center justify-center font-bold text-lg">2</div>
+                            <div>
+                                <h3 class="font-bold text-lg">正确刷牙法</h3>
+                                <p class="text-slate-500 text-sm">学习巴氏刷牙法</p>
+                            </div>
+                        </div>
+                        <i class="fas fa-chevron-down text-slate-400 transition-transform"></i>
+                    </div>
+                    <div class="hidden mt-4 pl-16 text-slate-600 text-sm space-y-2">
+                        <p>✓ 牙刷45度角对准牙龈沟（牙齿与牙龈交界处）</p>
+                        <p>✓ 小幅度水平颤动（2-3颗牙为一组），避免大幅横刷</p>
+                        <p>✓ 每次刷牙至少2分钟，每天早晚各一次</p>
+                        <p>✓ 刷毛尖端垂直清洁后牙咬合面凹槽</p>
+                    </div>
+                </div>
+
+                <!-- Day 3 -->
+                <div class="glass-effect rounded-2xl p-6 shadow-md hover:shadow-lg transition cursor-pointer" onclick="toggleDay(this)">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-sky-400 to-cyan-500 text-white flex items-center justify-center font-bold text-lg">3</div>
+                            <div>
+                                <h3 class="font-bold text-lg">牙线初体验</h3>
+                                <p class="text-slate-500 text-sm">清洁牙缝，去除邻面菌斑</p>
+                            </div>
+                        </div>
+                        <i class="fas fa-chevron-down text-slate-400 transition-transform"></i>
+                    </div>
+                    <div class="hidden mt-4 pl-16 text-slate-600 text-sm space-y-2">
+                        <p>✓ 购买牙线棒或卷状牙线</p>
+                        <p>✓ 轻柔拉锯式滑入牙龈沟底，不要用力过猛</p>
+                        <p>✓ 将牙线紧贴一侧牙面，从沟底向咬合面提拉刮除</p>
+                        <p>✓ 每晚睡前使用一次，出血是正常的，坚持一周会改善</p>
+                    </div>
+                </div>
+
+                <!-- Day 4 -->
+                <div class="glass-effect rounded-2xl p-6 shadow-md hover:shadow-lg transition cursor-pointer" onclick="toggleDay(this)">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-sky-400 to-cyan-500 text-white flex items-center justify-center font-bold text-lg">4</div>
+                            <div>
+                                <h3 class="font-bold text-lg">饮食调整日</h3>
+                                <p class="text-slate-500 text-sm">减少糖分摄入</p>
+                            </div>
+                        </div>
+                        <i class="fas fa-chevron-down text-slate-400 transition-transform"></i>
+                    </div>
+                    <div class="hidden mt-4 pl-16 text-slate-600 text-sm space-y-2">
+                        <p>✓ 用白开水代替含糖饮料，少喝奶茶</p>
+                        <p>✓ 吃完零食后漱口，清除食物残渣</p>
+                        <p>✓ 增加蔬菜水果摄入（纤维清洁牙齿）</p>
+                        <p>✓ 避免睡前吃东西，减少夜间细菌繁殖</p>
+                    </div>
+                </div>
+
+                <!-- Day 5 -->
+                <div class="glass-effect rounded-2xl p-6 shadow-md hover:shadow-lg transition cursor-pointer" onclick="toggleDay(this)">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-sky-400 to-cyan-500 text-white flex items-center justify-center font-bold text-lg">5</div>
+                            <div>
+                                <h3 class="font-bold text-lg">漱口水与冲牙器</h3>
+                                <p class="text-slate-500 text-sm">辅助清洁工具</p>
+                            </div>
+                        </div>
+                        <i class="fas fa-chevron-down text-slate-400 transition-transform"></i>
+                    </div>
+                    <div class="hidden mt-4 pl-16 text-slate-600 text-sm space-y-2">
+                        <p>✓ 购买含氯己定或精油的漱口水（非必需，刷牙后使用）</p>
+                        <p>✓ 含漱30秒，不要立即用清水漱口（保持药效）</p>
+                        <p>✓ 冲牙器喷头垂直于牙面，沿牙龈边缘缓慢移动</p>
+                        <p>✓ 注意：漱口水和冲牙器都不能替代刷牙和牙线</p>
+                    </div>
+                </div>
+
+                <!-- Day 6 -->
+                <div class="glass-effect rounded-2xl p-6 shadow-md hover:shadow-lg transition cursor-pointer" onclick="toggleDay(this)">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-sky-400 to-cyan-500 text-white flex items-center justify-center font-bold text-lg">6</div>
+                            <div>
+                                <h3 class="font-bold text-lg">习惯巩固日</h3>
+                                <p class="text-slate-500 text-sm">建立完整口腔护理流程</p>
+                            </div>
+                        </div>
+                        <i class="fas fa-chevron-down text-slate-400 transition-transform"></i>
+                    </div>
+                    <div class="hidden mt-4 pl-16 text-slate-600 text-sm space-y-2">
+                        <p>✓ 早：巴氏刷牙法2分钟</p>
+                        <p>✓ 中：午饭后漱口</p>
+                        <p>✓ 晚：刷牙2分钟 + 牙线 + 漱口水</p>
+                        <p>✓ 设置手机提醒，坚持21天养成习惯</p>
+                    </div>
+                </div>
+
+                <!-- Day 7 -->
+                <div class="glass-effect rounded-2xl p-6 shadow-md hover:shadow-lg transition cursor-pointer" onclick="toggleDay(this)">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-400 to-green-500 text-white flex items-center justify-center font-bold text-lg">7</div>
+                            <div>
+                                <h3 class="font-bold text-lg">专业检查预约</h3>
+                                <p class="text-slate-500 text-sm">定期洗牙，专业防护</p>
+                            </div>
+                        </div>
+                        <i class="fas fa-chevron-down text-slate-400 transition-transform"></i>
+                    </div>
+                    <div class="hidden mt-4 pl-16 text-slate-600 text-sm space-y-2">
+                        <p>✓ 搜索附近口腔医院/诊所</p>
+                        <p>✓ 预约洗牙（龈上洁治），每年1-2次</p>
+                        <p>✓ 如有出血、松动等症状，咨询是否需要龈下刮治</p>
+                        <p>✓ 建立长期维护计划，预防胜于治疗</p>
+                        <p class="text-sky-600 font-medium mt-2">🎉 恭喜完成7天计划！继续保持，定期复查。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 关于模型 -->
+    <section id="about" class="py-20 bg-gradient-to-b from-sky-50/50 to-white/50">
+        <div class="max-w-4xl mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">关于预测模型</h2>
+                <p class="text-slate-600">技术背后的科学原理</p>
+            </div>
+
+            <div class="glass-effect rounded-3xl p-8 shadow-xl">
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div>
+                        <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
+                            <i class="fas fa-brain text-purple-500"></i>
+                            随机森林算法
+                        </h3>
+                        <p class="text-slate-600 text-sm leading-relaxed mb-4">
+                            采用集成学习方法，通过多棵决策树投票提高预测准确性。能够处理非线性关系，自动识别各风险因素的重要性排序。
+                        </p>
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-sm">
+                                <span class="text-slate-600">准确率</span>
+                                <span class="font-bold text-sky-600">87.3%</span>
+                            </div>
+                            <div class="h-2 bg-slate-200 rounded-full">
+                                <div class="h-full bg-purple-500 rounded-full" style="width: 87.3%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
+                            <i class="fas fa-network-wired text-blue-500"></i>
+                            MLP神经网络
+                        </h3>
+                        <p class="text-slate-600 text-sm leading-relaxed mb-4">
+                            多层感知机模拟生物神经元工作方式，通过反向传播算法不断优化权重，擅长发现复杂的特征组合模式。
+                        </p>
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-sm">
+                                <span class="text-slate-600">AUC评分</span>
+                                <span class="font-bold text-sky-600">0.91</span>
+                            </div>
+                            <div class="h-2 bg-slate-200 rounded-full">
+                                <div class="h-full bg-blue-500 rounded-full" style="width: 91%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-8 pt-8 border-t border-slate-200">
+                    <h4 class="font-bold mb-4">八项校园特征重要性排序（基于大学生数据训练）</h4>
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-3">
+                            <span class="text-xs font-bold w-6">1</span>
+                            <div class="flex-1 h-8 bg-slate-100 rounded-lg overflow-hidden relative">
+                                <div class="absolute inset-y-0 left-0 bg-gradient-to-r from-sky-500 to-cyan-500 flex items-center px-3 text-white text-xs font-medium" style="width: 95%">
+                                    刷牙频率与方式
+                                </div>
+                            </div>
+                            <span class="text-xs text-slate-500 w-12 text-right">95%</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="text-xs font-bold w-6">2</span>
+                            <div class="flex-1 h-8 bg-slate-100 rounded-lg overflow-hidden relative">
+                                <div class="absolute inset-y-0 left-0 bg-gradient-to-r from-sky-500 to-cyan-500 flex items-center px-3 text-white text-xs font-medium" style="width: 88%">
+                                    牙龈出血史
+                                </div>
+                            </div>
+                            <span class="text-xs text-slate-500 w-12 text-right">88%</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="text-xs font-bold w-6">3</span>
+                            <div class="flex-1 h-8 bg-slate-100 rounded-lg overflow-hidden relative">
+                                <div class="absolute inset-y-0 left-0 bg-gradient-to-r from-sky-500 to-cyan-500 flex items-center px-3 text-white text-xs font-medium" style="width: 82%">
+                                    熬夜/作息规律
+                                </div>
+                            </div>
+                            <span class="text-xs text-slate-500 w-12 text-right">82%</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="text-xs font-bold w-6">4</span>
+                            <div class="flex-1 h-8 bg-slate-100 rounded-lg overflow-hidden relative">
+                                <div class="absolute inset-y-0 left-0 bg-gradient-to-r from-sky-500 to-cyan-500 flex items-center px-3 text-white text-xs font-medium" style="width: 78%">
+                                    糖分/饮料摄入
+                                </div>
+                            </div>
+                            <span class="text-xs text-slate-500 w-12 text-right">78%</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="text-xs font-bold w-6">5</span>
+                            <div class="flex-1 h-8 bg-slate-100 rounded-lg overflow-hidden relative">
+                                <div class="absolute inset-y-0 left-0 bg-gradient-to-r from-sky-500 to-cyan-500 flex items-center px-3 text-white text-xs font-medium" style="width: 74%">
+                                    吸烟/饮酒习惯
+                                </div>
+                            </div>
+                            <span class="text-xs text-slate-500 w-12 text-right">74%</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="text-xs font-bold w-6">6</span>
+                            <div class="flex-1 h-8 bg-slate-100 rounded-lg overflow-hidden relative">
+                                <div class="absolute inset-y-0 left-0 bg-gradient-to-r from-sky-500 to-cyan-500 flex items-center px-3 text-white text-xs font-medium" style="width: 70%">
+                                    定期洗牙情况
+                                </div>
+                            </div>
+                            <span class="text-xs text-slate-500 w-12 text-right">70%</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="text-xs font-bold w-6">7</span>
+                            <div class="flex-1 h-8 bg-slate-100 rounded-lg overflow-hidden relative">
+                                <div class="absolute inset-y-0 left-0 bg-gradient-to-r from-sky-500 to-cyan-500 flex items-center px-3 text-white text-xs font-medium" style="width: 65%">
+                                    心理压力水平
+                                </div>
+                            </div>
+                            <span class="text-xs text-slate-500 w-12 text-right">65%</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="text-xs font-bold w-6">8</span>
+                            <div class="flex-1 h-8 bg-slate-100 rounded-lg overflow-hidden relative">
+                                <div class="absolute inset-y-0 left-0 bg-gradient-to-r from-sky-500 to-cyan-500 flex items-center px-3 text-white text-xs font-medium" style="width: 60%">
+                                    家族病史
+                                </div>
+                            </div>
+                            <span class="text-xs text-slate-500 w-12 text-right">60%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6 p-4 bg-amber-50 rounded-xl border border-amber-200 text-sm text-amber-800">
+                    <i class="fas fa-exclamation-circle mr-2"></i>
+                    <strong>免责声明：</strong>本工具仅供参考，不能替代专业医疗诊断。如有口腔不适（牙龈出血、肿痛、牙齿松动、口臭等），请及时就医。
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="bg-slate-800 text-slate-300 py-12">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <div class="flex justify-center items-center gap-2 mb-4">
+                <i class="fas fa-tooth text-sky-400 text-2xl"></i>
+                <span class="text-xl font-bold text-white">牙周炎风险评估系统</span>
+            </div>
+            <p class="text-sm text-slate-400 mb-4">大学生口腔健康守护计划 | 课程设计项目</p>
+            <div class="flex justify-center gap-6 text-sm">
+                <a href="#" class="hover:text-white transition">隐私政策</a>
+                <a href="#" class="hover:text-white transition">使用条款</a>
+                <a href="#" class="hover:text-white transition">联系我们</a>
+            </div>
+            <p class="text-xs text-slate-500 mt-8">© 2026 牙周炎风险评估系统. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // 八项校园特征问卷数据
+        const questions = [
+            {
+                id: 1,
+                question: "你每天的刷牙频率和方式是？",
+                icon: "fa-tooth",
+                options: [
+                    { value: 0, text: "每天2次，使用巴氏刷牙法", score: 0 },
+                    { value: 1, text: "每天2次，但横刷或用力过猛", score: 4 },
+                    { value: 2, text: "每天1次或偶尔忘记", score: 7 },
+                    { value: 3, text: "很少刷牙或从不刷牙", score: 10 }
+                ]
+            },
+            {
+                id: 2,
+                question: "刷牙时牙龈是否出血？",
+                icon: "fa-tint",
+                options: [
+                    { value: 0, text: "从不出血", score: 0 },
+                    { value: 1, text: "偶尔出血", score: 3 },
+                    { value: 2, text: "经常出血", score: 7 },
+                    { value: 3, text: "每次都出血，甚至有脓液", score: 10 }
+                ]
+            },
+            {
+                id: 3,
+                question: "你通常几点睡觉？是否经常熬夜？",
+                icon: "fa-moon",
+                options: [
+                    { value: 0, text: "23点前，作息规律", score: 0 },
+                    { value: 1, text: "23-24点，偶尔熬夜", score: 3 },
+                    { value: 2, text: "0-2点，经常熬夜", score: 7 },
+                    { value: 3, text: "2点后或通宵，长期熬夜", score: 10 }
+                ]
+            },
+            {
+                id: 4,
+                question: "你的奶茶/含糖饮料摄入频率？",
+                icon: "fa-coffee",
+                options: [
+                    { value: 0, text: "很少喝，以白开水为主", score: 0 },
+                    { value: 1, text: "每周2-3杯", score: 3 },
+                    { value: 2, text: "每天1杯", score: 6 },
+                    { value: 3, text: "每天2杯以上，当水喝", score: 10 }
+                ]
+            },
+            {
+                id: 5,
+                question: "你是否有吸烟或饮酒习惯？",
+                icon: "fa-smoking",
+                options: [
+                    { value: 0, text: "都不沾", score: 0 },
+                    { value: 1, text: "偶尔饮酒，不吸烟", score: 3 },
+                    { value: 2, text: "经常饮酒或偶尔吸烟", score: 6 },
+                    { value: 3, text: "经常吸烟或酗酒", score: 10 }
+                ]
+            },
+            {
+                id: 6,
+                question: "你多久进行一次专业洗牙？",
+                icon: "fa-user-md",
+                options: [
+                    { value: 0, text: "每年1-2次", score: 0 },
+                    { value: 1, text: "2-3年一次", score: 4 },
+                    { value: 2, text: "3年以上未洗", score: 8 },
+                    { value: 3, text: "从未洗过", score: 10 }
+                ]
+            },
+            {
+                id: 7,
+                question: "最近是否感到压力大、焦虑或情绪低落？",
+                icon: "fa-brain",
+                options: [
+                    { value: 0, text: "心情平稳，压力可控", score: 0 },
+                    { value: 1, text: "偶尔压力大，但能自我调节", score: 3 },
+                    { value: 2, text: "经常焦虑，影响睡眠", score: 6 },
+                    { value: 3, text: "长期抑郁或高压状态", score: 10 }
+                ]
+            },
+            {
+                id: 8,
+                question: "家族中是否有人患过牙周炎或早失牙？",
+                icon: "fa-users",
+                options: [
+                    { value: 0, text: "没有", score: 0 },
+                    { value: 1, text: "不确定", score: 3 },
+                    { value: 2, text: "有1位直系亲属", score: 6 },
+                    { value: 3, text: "多位亲属患病", score: 10 }
+                ]
+            }
+        ];
+
+        let currentQuestion = 0;
+        let answers = {};
+        let totalScore = 0;
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            renderQuestion();
+            showDailyTip();
+        });
+
+        // 显示每日提示
+        function showDailyTip() {
+            const tips = [
+                "喝完奶茶一定要漱口，糖分是细菌的最爱！",
+                "熬夜会加重牙龈炎症，保持规律作息很重要。",
+                "刷牙别用力过猛，温柔对待你的牙龈。",
+                "牙缝刷比牙签更安全，不会伤害牙龈。",
+                "定期更换牙刷，3个月是极限。",
+                "多吃苹果、胡萝卜，天然清洁牙齿。",
+                "压力大会导致磨牙，睡前放松一下。",
+                "舌苔也要清洁，细菌喜欢藏在那里。"
+            ];
+            const randomTip = tips[Math.floor(Math.random() * tips.length)];
+            document.getElementById('tipContent').textContent = randomTip;
+            document.getElementById('dailyTip').classList.remove('hidden');
+            
+            setTimeout(() => {
+                closeTip();
+            }, 8000);
+        }
+
+        function closeTip() {
+            document.getElementById('dailyTip').classList.add('hidden');
+        }
+
+        // 渲染问题
+        function renderQuestion() {
+            const q = questions[currentQuestion];
+            const container = document.getElementById('questionContainer');
+            
+            let html = `
+                <div class="text-center mb-8">
+                    <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-sky-100 to-cyan-100 flex items-center justify-center text-sky-600 text-2xl">
+                        <i class="fas ${q.icon}"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-800">${q.question}</h3>
+                </div>
+                <div class="grid gap-3">
+            `;
+            
+            q.options.forEach((opt, idx) => {
+                const selected = answers[q.id] === idx ? 'selected' : '';
+                html += `
+                    <div class="option-card p-4 rounded-xl border-2 border-slate-200 ${selected}" 
+                         onclick="selectOption(${idx}, ${opt.score})">
+                        <div class="flex items-center justify-between">
+                            <span class="font-medium text-slate-700">${opt.text}</span>
+                            ${selected ? '<i class="fas fa-check-circle text-sky-500"></i>' : ''}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            container.innerHTML = html;
+            
+            document.getElementById('progressText').textContent = `${currentQuestion + 1}/${questions.length}`;
+            document.getElementById('progressBar').style.width = `${((currentQuestion + 1) / questions.length) * 100}%`;
+            
+            document.getElementById('prevBtn').classList.toggle('hidden', currentQuestion === 0);
+            const nextBtn = document.getElementById('nextBtn');
+            if (currentQuestion === questions.length - 1) {
+                nextBtn.innerHTML = '查看结果<i class="fas fa-chart-pie ml-2"></i>';
+            } else {
+                nextBtn.innerHTML = '下一题<i class="fas fa-arrow-right ml-2"></i>';
+            }
+        }
+
+        function selectOption(optionIndex, score) {
+            answers[questions[currentQuestion].id] = optionIndex;
+            renderQuestion();
+        }
+
+        function nextQuestion() {
+            if (answers[questions[currentQuestion].id] === undefined) {
+                alert('请先选择一个选项');
+                return;
+            }
+            
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                renderQuestion();
+            } else {
+                calculateResult();
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                renderQuestion();
+            }
+        }
+
+        function calculateResult() {
+            totalScore = 0;
+            Object.keys(answers).forEach(key => {
+                const q = questions.find(q => q.id == key);
+                totalScore += q.options[answers[key]].score;
+            });
+            
+            showResult();
+        }
+
+        function showResult() {
+            document.getElementById('assessment').classList.add('hidden');
+            document.getElementById('result').classList.remove('hidden');
+            document.getElementById('result').scrollIntoView({ behavior: 'smooth' });
+            
+            let riskLevel, riskColor, riskDesc, offset;
+            const maxScore = 80;
+            const percentage = (totalScore / maxScore) * 100;
+            
+            if (percentage <= 30) {
+                riskLevel = '低风险';
+                riskColor = '#10b981';
+                riskDesc = '你的牙周状况良好，请继续保持！';
+                offset = 339.292 * 0.3;
+            } else if (percentage <= 60) {
+                riskLevel = '中风险';
+                riskColor = '#f59e0b';
+                riskDesc = '存在轻度问题，建议改善口腔习惯。';
+                offset = 339.292 * 0.6;
+            } else {
+                riskLevel = '高风险';
+                riskColor = '#ef4444';
+                riskDesc = '牙周健康状况堪忧，建议尽快就医！';
+                offset = 339.292 * 0.9;
+            }
+            
+            document.getElementById('riskScore').textContent = Math.round(percentage) + '%';
+            document.getElementById('riskScore').style.color = riskColor;
+            document.getElementById('riskLevel').textContent = riskLevel;
+            document.getElementById('riskLevel').className = `text-2xl font-bold mb-2 risk-${percentage <= 30 ? 'low' : percentage <= 60 ? 'medium' : 'high'}`;
+            document.getElementById('riskDesc').textContent = riskDesc;
+            
+            const circle = document.getElementById('riskCircle');
+            circle.style.stroke = riskColor;
+            circle.style.strokeDashoffset = 339.292 - (339.292 * percentage / 100);
+            
+            generateRiskFactors();
+            generateImprovementPlan(percentage);
+        }
+
+        function generateRiskFactors() {
+            const factors = [];
+            const factorMap = [
+                { condition: answers[4] >= 2, name: '熬夜/作息不规律', icon: 'fa-moon', color: 'text-indigo-500', bg: 'bg-indigo-50' },
+                { condition: answers[3] >= 2, name: '高糖饮食', icon: 'fa-coffee', color: 'text-rose-500', bg: 'bg-rose-50' },
+                { condition: answers[1] >= 2, name: '刷牙出血', icon: 'fa-tint', color: 'text-red-500', bg: 'bg-red-50' },
+                { condition: answers[6] >= 2, name: '心理压力过大', icon: 'fa-brain', color: 'text-purple-500', bg: 'bg-purple-50' },
+                { condition: answers[5] >= 2, name: '从不洗牙', icon: 'fa-user-md', color: 'text-blue-500', bg: 'bg-blue-50' },
+                { condition: answers[5] >= 1, name: '吸烟/饮酒', icon: 'fa-smoking', color: 'text-slate-500', bg: 'bg-slate-50' }
+            ];
+
+            factorMap.forEach(item => {
+                if (item.condition) {
+                    factors.push(item);
+                }
+            });
+
+            if (factors.length === 0) {
+                factors.push({ name: '无明显风险因素', icon: 'fa-check-circle', color: 'text-green-500', bg: 'bg-green-50' });
+            }
+
+            const html = factors.map(f => `
+                <div class="flex items-center gap-3 p-3 ${f.bg} rounded-xl border border-${f.color.split('-')[1]}-200">
+                    <i class="fas ${f.icon} ${f.color} text-xl"></i>
+                    <span class="font-medium text-slate-700">${f.name}</span>
+                </div>
+            `).join('');
+            
+            document.getElementById('riskFactors').innerHTML = html;
+        }
+
+        function generateImprovementPlan(percentage) {
+            let plans = [];
+            
+            if (percentage <= 30) {
+                plans = [
+                    { icon: 'fa-shield-alt', title: '保持现状', desc: '你的习惯很好，继续保持当前护理方式。', color: 'green' },
+                    { icon: 'fa-calendar-check', title: '定期检查', desc: '建议每年洗牙1次，定期检查牙周状况。', color: 'blue' },
+                    { icon: 'fa-apple-alt', title: '健康饮食', desc: '继续控制糖分摄入，多吃富含纤维的食物。', color: 'emerald' },
+                    { icon: 'fa-book-medical', title: '知识更新', desc: '关注口腔健康新知识，预防胜于治疗。', color: 'cyan' }
+                ];
+            } else if (percentage <= 60) {
+                plans = [
+                    { icon: 'fa-tooth', title: '改进刷牙', desc: '使用巴氏刷牙法，每天2次，每次2分钟。', color: 'sky' },
+                    { icon: 'fa-moon', title: '调整作息', desc: '减少熬夜，保持规律作息，提高免疫力。', color: 'indigo' },
+                    { icon: 'fa-coffee', title: '减少糖分', desc: '少喝奶茶饮料，吃完甜食记得漱口。', color: 'rose' },
+                    { icon: 'fa-user-md', title: '预约洗牙', desc: '建议3个月内预约专业洗牙，清除牙结石。', color: 'amber' }
+                ];
+            } else {
+                plans = [
+                    { icon: 'fa-hospital', title: '立即就医', desc: '建议1周内到牙周科就诊，进行专业检查。', color: 'red' },
+                    { icon: 'fa-pills', title: '药物治疗', desc: '可能需要抗生素或专业漱口水控制炎症。', color: 'orange' },
+                    { icon: 'fa-ban', title: '戒烟限糖', desc: '必须戒烟限酒，严格控制糖分摄入。', color: 'slate' },
+                    { icon: 'fa-procedures', title: '深度清洁', desc: '可能需要龈下刮治等专业治疗手段。', color: 'purple' }
+                ];
+            }
+
+            const html = plans.map(p => `
+                <div class="flex gap-4 p-4 bg-${p.color}-50 rounded-xl border border-${p.color}-200">
+                    <div class="w-12 h-12 rounded-full bg-${p.color}-100 flex items-center justify-center text-${p.color}-600 flex-shrink-0">
+                        <i class="fas ${p.icon} text-xl"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-slate-800 mb-1">${p.title}</h4>
+                        <p class="text-sm text-slate-600">${p.desc}</p>
+                    </div>
+                </div>
+            `).join('');
+            
+            document.getElementById('improvementPlan').innerHTML = html;
+        }
+
+        function resetAssessment() {
+            currentQuestion = 0;
+            answers = {};
+            totalScore = 0;
+            document.getElementById('result').classList.add('hidden');
+            document.getElementById('assessment').classList.remove('hidden');
+            document.getElementById('assessment').scrollIntoView({ behavior: 'smooth' });
+            renderQuestion();
+        }
+
+        function toggleCard(card) {
+            const content = card.querySelector('.card-content');
+            const icon = card.querySelector('.fa-chevron-down');
+            const text = card.querySelector('.toggle-text');
+            
+            if (content.classList.contains('hidden')) {
+                content.classList.remove('hidden');
+                icon.style.transform = 'rotate(180deg)';
+                text.textContent = '收起详情';
+            } else {
+                content.classList.add('hidden');
+                icon.style.transform = 'rotate(0deg)';
+                text.textContent = '展开详情';
+            }
+        }
+
+        function toggleDay(day) {
+            const content = day.querySelector('.hidden');
+            const icon = day.querySelector('.fa-chevron-down');
+            
+            if (content) {
+                content.classList.remove('hidden');
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                const div = day.querySelector('div.mt-4');
+                if (div) {
+                    div.classList.add('hidden');
+                    icon.style.transform = 'rotate(0deg)';
+                }
+            }
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            menu.classList.toggle('hidden');
+        }
+
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    document.getElementById('mobileMenu').classList.add('hidden');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
